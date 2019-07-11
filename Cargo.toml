@@ -4,4 +4,8 @@ version = "0.1.0"
 authors = ["Marek Counts <mcounts@suse.com>"]
 edition = "2018"
 
+[lib]
+name = "plugin-runtime-containerd"
+crate-type = ["cdylib"]
+
 [dependencies]

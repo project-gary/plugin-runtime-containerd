@@ -1,12 +1,32 @@
 #[macro_use]
 extern crate core;
+extern crate bollard;
+extern crate futures;
 
 use core::plugins::runtime::*;
+use futures::Future;
+use tokio::prelude::*;
+use tokio::runtime::*;
+use bollard::Docker;
 
-#[derive(Debug, Default)]
-struct ContainerdRuntimePlugin;
+#[derive(Debug)]
+struct ContainerdRuntimePlugin {
+    docker: Docker,
+    runner: tokio::runtime::Runtime,
+}
 
-declare_plugin!(ContainerdRuntimePlugin, ContainerdRuntimePlugin::default);
+impl ContainerdRuntimePlugin {
+    fn new() -> Self {
+        let mut doc = Docker::connect_with_local_defaults().unwrap();
+        let mut rt = Runtime::new().unwrap();
+        return ContainerdRuntimePlugin{
+            runner: rt,
+            docker: doc
+        }
+    }
+}
+
+declare_plugin!(ContainerdRuntimePlugin, ContainerdRuntimePlugin::new);
 
 impl RuntimePlugin for ContainerdRuntimePlugin {
     /// The name of the plugin used to identify it.

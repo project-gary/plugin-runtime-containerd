@@ -8,5 +8,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-core = { path = "../gary/core" }
-#{ git = "https://github.com/project-gary/gary", branch = "master"}
+core = { path = "../gary/core" } #{ git = "https://github.com/project-gary/gary", branch = "master"}
+bollard = "0.3"
+tokio = "0.1"
+futures = "0.1"

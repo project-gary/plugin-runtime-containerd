@@ -1,0 +1,12 @@
+[package]
+name = "plugin-runtime-containerd"
+version = "0.1.0"
+authors = ["Marek Counts <mcounts@suse.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+core = { path = "../gary/core" }
+#{ git = "https://github.com/project-gary/gary", branch = "master"}

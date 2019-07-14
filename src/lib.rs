@@ -8,6 +8,9 @@ use futures::Future;
 use tokio::prelude::*;
 use tokio::runtime::*;
 use bollard::Docker;
+use bollard::container::{
+    Config, CreateContainerOptions, HostConfig, LogOutput, LogsOptions, StartContainerOptions,
+};
 
 #[derive(Debug)]
 struct ContainerdRuntimePlugin {
@@ -31,7 +34,7 @@ declare_plugin!(ContainerdRuntimePlugin, ContainerdRuntimePlugin::new);
 impl RuntimePlugin for ContainerdRuntimePlugin {
     /// The name of the plugin used to identify it.
     fn name(&self) -> String {
-        return "Boby Jones".to_string();
+        return "docker".to_string();
     }
     /// A callback fired immediately after the plugin is loaded. Usually used
     /// for initialization.
@@ -39,9 +42,11 @@ impl RuntimePlugin for ContainerdRuntimePlugin {
     /// A callback fired immediately before the plugin is unloaded. Use this if
     /// you need to do any cleanup.
     fn on_plugin_unload(&self) {}
+
     fn get_features(&self) -> Vec<RuntimeFeatures> {
         return vec![RuntimeFeatures::WorkloadRunner, RuntimeFeatures::Container];
     }
+    
     fn get_version(&self) -> i32 {
         0
     }
@@ -53,11 +58,28 @@ impl RuntimePlugin for ContainerdRuntimePlugin {
         config: &RuntimeConfig,
         options: &Option<SandboxConfig>,
     ) -> Result<String, RuntimeError> {
+
         return Err(RuntimeError::new(RuntimeErrorType::Unknown));
     }
 
-    fn start_workload(&self, id: String) -> Option<RuntimeError> {
-        return None;
+    fn start_workload(&mut self, id: String) -> Option<RuntimeError> {
+        let nginx_config = Config {
+            image: Some("nginx"),
+            env: Some(vec![]),
+            ..Default::default()
+        };
+        let res = self.runner.block_on(self.docker
+            .create_container(Some(CreateContainerOptions { name: "nginx" }), nginx_config));
+        let results = self.runner.block_on(
+            self.docker.start_container(
+                "nginx", None::<StartContainerOptions<String>>
+            )
+        );
+        match results {
+            Ok(_) => return None,
+            Err(_) => return Some(RuntimeError::new(RuntimeErrorType::Unknown)),
+        }
+        return Some(RuntimeError::new(RuntimeErrorType::Unknown));
     }
 
     fn stop_workload(&self, id: String, timeout: i32) -> Option<RuntimeError> {
